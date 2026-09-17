@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <title>Vision — Streamline the shop virtual</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;overflow:hidden;background:#020204}
+    body{font-family:Poppins,Inter,system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased}
+    a{text-decoration:none;color:inherit}
+
+    /* Core Architecture */
+    .stage{position:fixed;inset:0;overflow:hidden;background:#020204}
+    .canvas{position:absolute;left:50%;top:0;width:1172px;height:657px;
+      transform:translateX(-50%) scale(var(--k,1));transform-origin:50% 0}
+    .canvas>*{position:absolute}
+    .stack{position:absolute;inset:0;z-index:300}
+    .stack>*{position:absolute}
+    .navmenu{display:contents}
+    .burger{display:none}
+
+    /* Background */
+    .bg{position:absolute;inset:0;z-index:0;
+      background:
+       linear-gradient(180deg, rgba(25,127,255,0) 38%, rgba(25,127,255,.042) 54%,
+         rgba(25,127,255,.052) 68%, rgba(25,127,255,.030) 100%),
+       #020204}
+
+    /* Starfield */
+    .stars{position:absolute;left:0;top:0;width:1px;height:1px;border-radius:50%;background:#fff}
+
+    /* Pixel Contract A — The Badge */
+    .badge{left:462px;top:95px;width:250px;height:39px;border-radius:12px;z-index:300;
+      border:1px solid rgba(255,255,255,.115);
+      background:linear-gradient(to top,
+        rgba(190,225,255,.175) 0px, rgba(190,225,255,.128) 2px, rgba(190,225,255,.075) 4px,
+        rgba(190,225,255,.026) 6px, rgba(255,255,255,.012) 9px, rgba(255,255,255,.012) 100%);
+      -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+    .badge i{position:absolute;left:4px;top:4px;width:29px;height:29px;border-radius:8px;
+      display:grid;place-items:center;
+      background:linear-gradient(to top,
+        #46afc8 0px, #35abc7 2px, #0b859d 4px, #026c84 6px, #004e66 8px,
+        #053f58 10px, #012c3d 12px, #031a2a 14px, #061125 16px, #090f25 19px,
+        #090c1c 23px, #060d16 29px);
+      box-shadow:inset 1px 0 0 rgba(150,220,250,.40),
+        inset -1px 0 0 rgba(150,220,250,.52),
+        0 0 6px rgba(60,190,230,.20), 0 3px 8px -5px rgba(90,220,255,.6)}
+    .badge i svg{width:14px;height:16px;position:relative;top:-1px;left:0px}
+    .badge b{position:absolute;left:45px;transform-origin:0 50%;top:0;height:39px;
+      display:flex;align-items:center;
+      font-size:13px;font-weight:400;color:rgba(255,255,255,.94);white-space:nowrap;
+      padding-top:1.5px}
+
+    /* Pixel Contract B — The Glow Button (.btn) */
+    .btn{display:grid;place-items:center;color:#fff;position:relative;overflow:hidden;
+      background:linear-gradient(to top,
+        #9ad9ec 1px, #89dff0 2px, #79e0f1 3px, #61daef 4px, #3ec8e4 5px,
+        #14a8c6 6px, #0596b3 7px, #038aa8 8px, #047796 9px, #006180 10px,
+        #025066 12px, #0a4f5e 13px, #04465a 14px, #073746 16px,
+        #0a2a37 18px, #0d212e 20px, #0f1824 24px, #0a121e 30px,
+        #0a111d 34px, #0a111d 100%);
+      box-shadow:
+        inset 0 3px 3px -2px rgba(180,228,255,.10),
+        inset 1px 0 0 rgba(255,255,255,.09),
+        inset -1px 0 0 rgba(255,255,255,.09),
+        var(--hair,0 1px 0 rgba(152,218,234,.38)),
+        1px 0 0 rgba(152,218,234,.17), -1px 0 0 rgba(152,218,234,.17),
+        0 0 8px rgba(60,190,235,.10),
+        0 2px 5px -3px rgba(90,220,255,.45);
+      transition:transform .25s,box-shadow .25s,filter .25s;
+      cursor:pointer}
+    .btn::before{
+      content:"";position:absolute;left:22%;right:38%;top:0.8px;height:1.9px;z-index:1;
+      filter:blur(.55px);
+      background:linear-gradient(90deg,rgba(120,225,255,0) 0%,rgba(120,225,255,.58) 34%,
+        rgba(160,240,255,.74) 50%,rgba(120,225,255,.58) 66%,rgba(120,225,255,0) 100%)}
+    .btn::after{
+      content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
+      background:linear-gradient(90deg,rgba(200,245,255,.70),rgba(200,245,255,0) 13px),
+                 linear-gradient(270deg,rgba(200,245,255,.70),rgba(200,245,255,0) 13px);
+      -webkit-mask:linear-gradient(to top,#000 0,#000 6px,rgba(0,0,0,.40) 12px,
+        rgba(0,0,0,.15) 18px,rgba(0,0,0,.09) 24px,rgba(0,0,0,.02) 30px,rgba(0,0,0,.02) 100%);
+              mask:linear-gradient(to top,#000 0,#000 6px,rgba(0,0,0,.40) 12px,
+        rgba(0,0,0,.15) 18px,rgba(0,0,0,.09) 24px,rgba(0,0,0,.02) 30px,rgba(0,0,0,.02) 100%)}
+    .btn span{position:relative;z-index:2;display:block;line-height:1;
+      text-shadow:0 1px 2px rgba(0,20,30,.5)}
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.12);
+      box-shadow:inset 0 1px 0 rgba(200,245,255,.6),inset 1px 0 0 rgba(170,225,255,.35),
+                 inset -1px 0 0 rgba(170,225,255,.35),0 6px 22px rgba(20,180,225,.55)}
+
+    /* Button instances */
+    .nav .btn{position:absolute;left:530.7px;top:10.5px;width:125.5px;height:39.5px;
+      border-radius:14px;font-size:14px;font-weight:500;letter-spacing:-.005em}
+    .nav .btn span{margin-top:0}
+
+    .cta2{position:absolute;left:526px;top:349px;width:121px;height:54.5px;
+      --hair:0 0 0 transparent;border-radius:13px;font-size:17px;font-weight:500;
+      letter-spacing:-.01em;z-index:300}
+    .cta2::before{display:none}
+    .cta2 span{margin-top:0}
+
+    /* Nav Pill */
+    .nav{position:absolute;left:247px;top:3px;width:678px;height:64px;border-radius:32px;z-index:400;
+      background:rgba(255,255,255,.008);
+      border:1px solid rgba(255,255,255,.105);
+      -webkit-backdrop-filter:blur(16px) saturate(140%);
+      backdrop-filter:blur(16px) saturate(140%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+    .mark{position:absolute;left:21px;top:19px;width:24px;height:24px;
+      filter:drop-shadow(0 0 6px rgba(60,224,255,.75));overflow:visible}
+    .wm{position:absolute;left:50px;top:0;white-space:nowrap}
+    .wm .kick{position:absolute;left:3px;top:20px;font-size:4.4px;font-weight:600;
+      letter-spacing:.10em;color:#fff;opacity:.92;line-height:1}
+    .wm .name{position:absolute;left:0;top:26px;transform-origin:0 50%;
+      font-family:Poppins;font-weight:900;font-size:22px;line-height:1;
+      letter-spacing:-.01em;color:#fff}
+    .links{position:absolute;left:156px;top:0;height:62px;transform-origin:0 50%;
+      display:flex;align-items:center;gap:24px}
+    .links a{font-size:12.5px;font-weight:400;color:rgba(255,255,255,.92);
+      white-space:nowrap;transition:opacity .25s}
+    .links a:hover{opacity:.65}
+
+    /* Hero Type */
+    .h1{position:absolute;left:586px;transform:translateX(-50%);white-space:nowrap;line-height:1;
+      font-family:Poppins;font-weight:900;font-size:54px;letter-spacing:-.004em;
+      word-spacing:.175em;text-transform:uppercase;color:#fff;
+      text-shadow:0 0 34px rgba(130,180,255,.22);z-index:300}
+    .sub{position:absolute;left:586px;transform:translateX(-50%);white-space:nowrap;line-height:1;
+      font-size:13.2px;color:#a9aeb5;z-index:300}
+    .sub b{font-weight:600;color:#fff}
+    .nb{white-space:nowrap}
+
+    /* Showcase & Ring Carousel */
+    .showcase{position:absolute;left:0;top:0;width:1172px;height:0}
+    .ring{position:absolute;left:0;top:0;width:1172px;height:657px;z-index:5;
+      perspective:891px;perspective-origin:586px 918px;transform-style:preserve-3d;
+      pointer-events:none}
+    .card{position:absolute;left:586px;top:616px;width:130px;height:300px;
+      margin:-150px 0 0 -65px;border-radius:12px;overflow:hidden;background:#0d1117;
+      box-shadow:0 24px 46px rgba(0,0,0,.6),0 3px 8px rgba(0,0,0,.5);
+      backface-visibility:hidden;will-change:transform}
+    .card img,.card video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .card .edge{position:absolute;inset:0;border-radius:12px;pointer-events:none;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.15),
+                 inset 0 16px 30px rgba(255,255,255,.05)}
+    .card.broken img,.card.broken video{display:none}
+
+    /* Shared creative classes */
+    .cv{position:absolute;left:0;right:0;padding:0 10px;pointer-events:none;z-index:2}
+    .fill{position:absolute;inset:0}
+    .ph{position:absolute;left:0;right:0;overflow:hidden;
+      background:linear-gradient(155deg,#2b3b50,#131c28 60%,#1d1526)}
+    .phf{top:0;bottom:0}
+    .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .dot{display:inline-block;width:4.5px;height:4.5px;background:#e5202f;
+      margin-right:4px;transform:rotate(45deg) translateY(-1px)}
+    .dot.sq{transform:none;width:6.5px;height:4.5px;border-radius:1px}
+    .t-big{font-family:Poppins;font-weight:900;font-size:13px;line-height:1.15;color:#fff;letter-spacing:-.01em;text-transform:uppercase}
+    .t-sub{font-size:8px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:2px}
+    .t-tag{font-size:7.5px;font-weight:600;letter-spacing:0.05em;color:#fff;background:rgba(0,0,0,.45);padding:2px 6px;border-radius:4px;border:1px solid rgba(255,255,255,.12);display:inline-flex;align-items:center;backdrop-filter:blur(4px)}
+    .t-price{font-size:9.5px;font-weight:600;color:#5de4ff;margin-top:4px}
+    .t-price .old{color:rgba(255,255,255,.4);text-decoration:line-through;margin-left:4px;font-size:8px}
+    .cv.top{top:12px;display:flex;justify-content:space-between;align-items:center}
+    .cv.bot{bottom:14px;background:linear-gradient(0deg,rgba(5,8,14,.92) 0%,rgba(5,8,14,.6) 75%,transparent 100%);padding-top:20px}
+
+    /* Browser Mockup */
+    .browser{position:absolute;left:165px;top:558px;width:842px;height:calc(99px + var(--fill,0px));
+      border-radius:28px 28px 0 0;z-index:100;
+      background:#090d15;
+      border:1px solid rgba(255,255,255,.13);border-bottom:none;
+      box-shadow:0 -16px 48px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.14);
+      overflow:hidden}
+    .browser-bar{position:absolute;left:0;top:0;right:0;height:42px;display:flex;align-items:center;padding:0 22px;
+      border-bottom:1px solid rgba(255,255,255,.07);background:linear-gradient(180deg,rgba(255,255,255,.025),transparent)}
+    .browser-bar .dots{display:flex;gap:7px;align-items:center}
+    .browser-bar .dots span{width:10px;height:10px;border-radius:50%;display:block}
+    .dot-r{background:#ff5f56;box-shadow:0 0 5px rgba(255,95,86,.4)}
+    .dot-y{background:#ffbd2e;box-shadow:0 0 5px rgba(255,189,46,.4)}
+    .dot-g{background:#27c93f;box-shadow:0 0 5px rgba(39,201,63,.4)}
+    .browser-bar .url-bar{margin-left:22px;height:24px;width:280px;border-radius:6px;
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+      display:flex;align-items:center;padding:0 10px;font-size:11px;color:rgba(255,255,255,.6);gap:7px}
+    .browser-bar .url-bar svg{opacity:.5}
+
+    .page{position:absolute;left:7px;right:6px;top:42px;bottom:0;border-radius:10px 10px 0 0;
+      background:#05070c;border:1px solid rgba(255,255,255,.06);border-bottom:none;overflow:hidden;padding:16px 20px}
+    .page-nav{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:12px;margin-bottom:14px}
+    .page-brand{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#fff}
+    .page-brand span{font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(53,216,255,.15);color:#35d8ff}
+    .page-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .stat-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:10px 12px}
+    .stat-label{font-size:9px;color:#8f96a3;text-transform:uppercase;letter-spacing:.05em}
+    .stat-val{font-size:15px;font-weight:700;color:#fff;margin-top:2px}
+    .stat-delta{font-size:9px;color:#35d8ff;font-weight:600;margin-top:1px}
+
+    /* WhatsApp Button */
+    .wa{position:absolute;right:16px;bottom:24px;width:56px;height:56px;border-radius:50%;
+      background:#25d366;z-index:300;display:grid;place-items:center;
+      box-shadow:0 6px 20px rgba(37,211,102,.35),0 2px 8px rgba(0,0,0,.4);
+      cursor:pointer;transition:transform .25s,box-shadow .25s,filter .25s}
+    .wa:hover{transform:translateY(-2px) scale(1.04);
+      box-shadow:0 8px 26px rgba(37,211,102,.5),0 4px 12px rgba(0,0,0,.5);
+      filter:brightness(1.08)}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <!-- Stage Background & Starfields -->
+    <div class="bg">
+      <div class="stars" id="stA"></div>
+      <div class="stars" id="stB"></div>
+    </div>
+
+    <!-- Scaled Canvas -->
+    <div class="canvas">
+      <!-- 3D Ring Showcase -->
+      <div class="showcase">
+        <div class="ring" id="ring"></div>
+      </div>
+
+      <!-- Browser Mockup -->
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <div class="url-bar">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+            </svg>
+            vertex.shop/live/atelier-store
+          </div>
+        </div>
+        <div class="page">
+          <div class="page-nav">
+            <div class="page-brand">
+              <strong>VERTEX CORE</strong>
+              <span>ENTERPRISE STORE</span>
+            </div>
+            <div style="font-size:10px;color:rgba(255,255,255,.6);display:flex;gap:14px;">
+              <span>Realtime Synced</span>
+              <span style="color:#27c93f;">● System Optimal</span>
+            </div>
+          </div>
+          <div class="page-stats">
+            <div class="stat-card">
+              <div class="stat-label">Net Sales 24h</div>
+              <div class="stat-val">$184,920</div>
+              <div class="stat-delta">+34.8% vs avg</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Checkout Latency</div>
+              <div class="stat-val">38ms</div>
+              <div class="stat-delta">p99 global edge</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Active Buyers</div>
+              <div class="stat-val">4,819</div>
+              <div class="stat-delta">62 countries</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Conversion Rate</div>
+              <div class="stat-val">4.92%</div>
+              <div class="stat-delta">+1.4% instant pay</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foreground Stack -->
+      <div class="stack">
+        <!-- Nav Pill -->
+        <nav class="nav">
+          <svg class="mark" viewBox="0 0 48 48">
+            <defs>
+              <linearGradient id="sw" x1="8" y1="8" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#8ef4ff"/>
+                <stop offset="50%" stop-color="#35d8ff"/>
+                <stop offset="100%" stop-color="#0a86d8"/>
+              </linearGradient>
+              <linearGradient id="sw2" x1="40" y1="10" x2="10" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#a6f7ff"/>
+                <stop offset="100%" stop-color="#0f9ae0" stop-opacity="0.25"/>
+              </linearGradient>
+            </defs>
+            <g transform="rotate(-32 24 24)">
+              <ellipse cx="24" cy="24" rx="18.5" ry="9.6" fill="none" stroke="url(#sw2)" stroke-width="3.1" stroke-linecap="round" stroke-dasharray="58 30" stroke-dashoffset="14"/>
+              <circle cx="41.4" cy="20.6" r="3.1" fill="#bff6ff"/>
+            </g>
+            <circle cx="24" cy="24" r="6.6" fill="url(#sw)"/>
+            <circle cx="24" cy="24" r="2.6" fill="#fff"/>
+          </svg>
+          <div class="wm">
+            <div class="kick">SHOPS</div>
+            <div class="name" id="wmName">VERTEX</div>
+          </div>
+          <div class="navmenu">
+            <div class="links">
+              <a href="#">Origin</a>
+              <a href="#">Learn how</a>
+              <a href="#">Core Vertex</a>
+              <a href="#">Prices</a>
+              <a href="#">Support</a>
+            </div>
+            <a class="btn" href="#"><span id="ctaLabel">Build new shop</span></a>
+          </div>
+        </nav>
+
+        <!-- Badge (Contract A) -->
+        <div class="badge">
+          <i>
+            <svg viewBox="5 1 14 22" preserveAspectRatio="none" fill="rgba(16,112,152,.72)" stroke="rgba(190,236,255,.6)" stroke-width="1.6" stroke-linejoin="round">
+              <path d="M13.9 1.6 5.5 13.6a.7.7 0 0 0 .6 1.1h4.2l-1 7.7a.7.7 0 0 0 1.25.55l8.3-12.1a.7.7 0 0 0-.6-1.1h-4.2l1-7.7a.7.7 0 0 0-1.25-.55Z"/>
+            </svg>
+          </i>
+          <b id="badgeTxt">Professionals at store startup</b>
+        </div>
+
+        <!-- Hero Type -->
+        <h1 class="h1" id="h1a">Streamline the shop</h1>
+        <h1 class="h1" id="h1b">Process</h1>
+        <p class="sub" id="sub1"><b>Restructuring store systems / <span class="nb">E-commerce</span></b> orchestrated with</p>
+        <p class="sub" id="sub2">checkouts, performance, a sustainable expansion.</p>
+
+        <!-- Hero CTA (Contract B) -->
+        <a class="btn cta2" href="#"><span id="vpLabel">See prices</span></a>
+      </div>
+    </div>
+
+    <!-- WhatsApp widget outside canvas -->
+    <a class="wa" href="#" aria-label="WhatsApp">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
+        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.04 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.16 12.04 20.16C10.64 20.16 9.26 19.8 8.05 19.09L7.76 18.92L4.66 19.73L5.49 16.71L5.3 16.41C4.51 15.15 4.09 13.56 4.09 11.92C4.09 7.38 7.79 3.67 12.04 3.67ZM8.83 7.37C8.65 7.37 8.35 7.44 8.1 7.71C7.86 7.98 7.18 8.62 7.18 9.92C7.18 11.22 8.13 12.47 8.26 12.65C8.4 12.83 10.11 15.48 12.75 16.61C14.94 17.55 15.38 17.36 15.86 17.32C16.34 17.27 17.41 16.68 17.63 16.05C17.85 15.42 17.85 14.88 17.78 14.77C17.71 14.66 17.53 14.6 17.26 14.46C17 14.33 15.7 13.69 15.46 13.6C15.22 13.51 15.05 13.47 14.87 13.74C14.7 14.01 14.2 14.6 14.05 14.77C13.9 14.95 13.75 14.97 13.48 14.84C13.21 14.7 12.35 14.42 11.33 13.51C10.54 12.8 10 11.93 9.85 11.66C9.7 11.39 9.83 11.25 9.97 11.11C10.1 10.98 10.25 10.78 10.39 10.62C10.53 10.45 10.57 10.34 10.66 10.16C10.75 9.98 10.71 9.83 10.64 9.69C10.57 9.56 10.05 8.28 9.83 7.76C9.62 7.25 9.4 7.32 9.24 7.32C9.09 7.31 8.91 7.31 8.83 7.37Z"/>
+      </svg>
+    </a>
+  </div>
+
+  <script>
+    /* Starfield Generation */
+    function genStars(id, count, blur, minAlpha, maxAlpha) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const shadows = [];
+      for (let i = 0; i < count; i++) {
+        const x = (Math.random() * 100).toFixed(2);
+        const y = (Math.random() * 100).toFixed(2);
+        const a = (minAlpha + Math.random() * (maxAlpha - minAlpha)).toFixed(3);
+        shadows.push(`${x}vw ${y}vh ${blur}px 0 rgba(255,255,255,${a})`);
+      }
+      el.style.boxShadow = shadows.join(', ');
+    }
+    genStars('stA', 150, 0, 0.05, 0.30);
+    genStars('stB', 18, 1.2, 0.35, 0.70);
+
+    /* Scale Law & Fill Calculation */
+    function updateScale() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const W = 1172;
+      const k = Math.min(vw / W, vh / 560);
+      document.documentElement.style.setProperty('--k', k);
+      const fill = Math.max(0, (vh / k) - 657);
+      document.documentElement.style.setProperty('--fill', fill + 'px');
+    }
+    window.addEventListener('resize', () => {
+      updateScale();
+      fitType();
+    });
+    updateScale();
+
+    /* 3D Ring Carousel Setup & Animation */
+    const ring = document.getElementById('ring');
+    const R = 891;
+    const n = 37;
+    const step = 360 / n;
+    const cullAngle = 42;
+    let phase = -2;
+    let last = performance.now();
+
+    const sampleThemes = [
+      { name: "ATELIER LUX", sub: "Haute Couture", price: "$340", grad: "linear-gradient(155deg,#34223f,#151024 60%,#0e0a16)" },
+      { name: "NEO AUDIO", sub: "Acoustics 01", price: "$290", grad: "linear-gradient(155deg,#1c3345,#0b1a26 60%,#09131d)" },
+      { name: "CERAMIC LAB", sub: "Handcrafted", price: "$85", grad: "linear-gradient(155deg,#3c362d,#231d16 60%,#16120d)" },
+      { name: "CYBER EYEWEAR", sub: "Titanium Frame", price: "$420", grad: "linear-gradient(155deg,#1d3e3a,#0b2320 60%,#091816)" },
+      { name: "VELOX CHRONO", sub: "Automatic 41mm", price: "$1,250", grad: "linear-gradient(155deg,#2e2840,#191328 60%,#110a1c)" },
+      { name: "KINETIC RUN", sub: "Zero Gravity", price: "$195", grad: "linear-gradient(155deg,#422424,#251010 60%,#190a0a)" },
+      { name: "PURE BOTANIC", sub: "Essence Serum", price: "$110", grad: "linear-gradient(155deg,#203b30,#0d2219 60%,#091811)" }
+    ];
+
+    const cards = [];
+    for (let i = 0; i < n; i++) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const theme = sampleThemes[i % sampleThemes.length];
+      const dotType = (i % 3 === 0) ? 'dot sq' : 'dot';
+      const tagText = (i % 2 === 0) ? 'VERIFIED' : 'FEATURED';
+
+      card.innerHTML = `
+        <div class="fill ph phf" style="background:${theme.grad};">
+          <video class="fill" muted loop playsinline preload="none"
+            data-src="https://your-cdn.example.com/shops/card-${i+1}.mp4"
+            onerror="this.closest('.card').classList.add('broken')"></video>
+        </div>
+        <div class="cv top">
+          <span class="t-tag"><span class="${dotType}"></span>${tagText}</span>
+        </div>
+        <div class="cv bot">
+          <div class="t-sub">${theme.sub}</div>
+          <div class="t-big">${theme.name}</div>
+          <div class="t-price">${theme.price} <span class="old">$${parseInt(theme.price.replace(/[$,]/g,''))+75}</span></div>
+        </div>
+        <div class="edge"></div>
+      `;
+      ring.appendChild(card);
+      cards.push(card);
+    }
+
+    function renderCarousel(t) {
+      const dt = Math.min((t - last) / 1000, 0.1);
+      last = t;
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        phase -= 1.9 * dt;
+      }
+      for (let i = 0; i < n; i++) {
+        const el = cards[i];
+        let a = ((i * step + phase) % 360 + 540) % 360 - 180;
+        const video = el.querySelector('video');
+        if (Math.abs(a) > cullAngle) {
+          el.style.visibility = 'hidden';
+          if (video && video.src) {
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+          }
+          continue;
+        }
+        el.style.visibility = 'visible';
+        if (video && !video.src) {
+          video.src = video.dataset.src;
+          video.play().catch(() => {});
+        }
+        const r = a * Math.PI / 180;
+        const c = Math.cos(r);
+        const x = (R * Math.sin(r)).toFixed(2);
+        const z = (R * (1 - c)).toFixed(2);
+        const rot = (-a).toFixed(2);
+        const b = (0.84 + 0.5 * (1 / c - 1)).toFixed(3);
+        el.style.transform = `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
+        el.style.filter = `brightness(${b})`;
+      }
+      requestAnimationFrame(renderCarousel);
+    }
+    requestAnimationFrame(renderCarousel);
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) last = performance.now();
+    });
+
+    /* Type Fitter (§11 & §1.5) */
+    function fitType() {
+      const k = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--k')) || 1;
+
+      function measureBaselineOffset(el) {
+        const probe = document.createElement('span');
+        probe.style.display = 'inline-block';
+        probe.style.width = '0px';
+        probe.style.height = '0px';
+        probe.style.verticalAlign = 'baseline';
+        el.appendChild(probe);
+        const probeBottom = probe.getBoundingClientRect().bottom;
+        const elTop = el.getBoundingClientRect().top;
+        probe.remove();
+        return (probeBottom - elTop) / k;
+      }
+
+      // #h1a: first baseline y 204.5, ink width 563.5, cap height 37.2
+      const h1a = document.getElementById('h1a');
+      if (h1a) {
+        h1a.style.transform = 'translateX(-50%)';
+        h1a.style.top = '165px';
+        const rectW = h1a.getBoundingClientRect().width / k;
+        const scaleX = 563.5 / rectW;
+        const bOffset = measureBaselineOffset(h1a);
+        const topY = 204.5 - bOffset;
+        h1a.style.top = topY + 'px';
+        h1a.style.transform = `translateX(-50%) scaleX(${scaleX})`;
+        h1a.style.transformOrigin = '50% 0';
+      }
+
+      // #h1b: first baseline y 258.5, ink width 197.5, cap height 37.2
+      const h1b = document.getElementById('h1b');
+      if (h1b) {
+        h1b.style.transform = 'translateX(-50%)';
+        h1b.style.top = '220px';
+        const rectW = h1b.getBoundingClientRect().width / k;
+        const scaleX = 197.5 / rectW;
+        const bOffset = measureBaselineOffset(h1b);
+        const topY = 258.5 - bOffset;
+        h1b.style.top = topY + 'px';
+        h1b.style.transform = `translateX(-50%) scaleX(${scaleX})`;
+        h1b.style.transformOrigin = '50% 0';
+      }
+
+      // #sub1: first baseline y 300.5, ink width 389, cap height 8.4
+      const sub1 = document.getElementById('sub1');
+      if (sub1) {
+        sub1.style.transform = 'translateX(-50%)';
+        sub1.style.top = '285px';
+        const rectW = sub1.getBoundingClientRect().width / k;
+        const scaleX = 389 / rectW;
+        const bOffset = measureBaselineOffset(sub1);
+        const topY = 300.5 - bOffset;
+        sub1.style.top = topY + 'px';
+        sub1.style.transform = `translateX(-50%) scaleX(${scaleX})`;
+        sub1.style.transformOrigin = '50% 0';
+      }
+
+      // #sub2: first baseline y 316.5, ink width 311, cap height 8.4
+      const sub2 = document.getElementById('sub2');
+      if (sub2) {
+        sub2.style.transform = 'translateX(-50%)';
+        sub2.style.top = '300px';
+        const rectW = sub2.getBoundingClientRect().width / k;
+        const scaleX = 311 / rectW;
+        const bOffset = measureBaselineOffset(sub2);
+        const topY = 316.5 - bOffset;
+        sub2.style.top = topY + 'px';
+        sub2.style.transform = `translateX(-50%) scaleX(${scaleX})`;
+        sub2.style.transformOrigin = '50% 0';
+      }
+
+      // #wmName: ink 51, cap 11.4, first baseline y 38.5
+      const wmName = document.getElementById('wmName');
+      if (wmName) {
+        wmName.style.transform = 'none';
+        wmName.style.top = '26px';
+        const rectW = wmName.getBoundingClientRect().width / k;
+        const scale = 51 / rectW;
+        const bOffset = measureBaselineOffset(wmName);
+        const topY = 38.5 - (bOffset * scale);
+        wmName.style.top = topY + 'px';
+        wmName.style.transform = `scale(${scale})`;
+        wmName.style.transformOrigin = '0 50%';
+      }
+
+      // #badgeTxt: ink 184, cap 9.4, transform pre 'translate(2px,-1px)'
+      const badgeTxt = document.getElementById('badgeTxt');
+      if (badgeTxt) {
+        badgeTxt.style.transform = 'none';
+        const rectW = badgeTxt.getBoundingClientRect().width / k;
+        const scale = 184 / rectW;
+        badgeTxt.style.transform = `translate(2px, -1px) scale(${scale})`;
+        badgeTxt.style.transformOrigin = '0 50%';
+      }
+
+      // #ctaLabel: ink 87, cap 8.9, then optically centred in its button
+      const ctaLabel = document.getElementById('ctaLabel');
+      if (ctaLabel) {
+        ctaLabel.style.transform = 'none';
+        const rectW = ctaLabel.getBoundingClientRect().width / k;
+        const scale = 87 / rectW;
+        ctaLabel.style.transform = `scale(${scale})`;
+        ctaLabel.style.transformOrigin = '50% 50%';
+      }
+
+      // #vpLabel: ink 76, cap 9.5, then optically centred in its button
+      const vpLabel = document.getElementById('vpLabel');
+      if (vpLabel) {
+        vpLabel.style.transform = 'none';
+        const rectW = vpLabel.getBoundingClientRect().width / k;
+        const scale = 76 / rectW;
+        vpLabel.style.transform = `scale(${scale})`;
+        vpLabel.style.transformOrigin = '50% 50%';
+      }
+
+      // .links a: cap 7.9 (one shared size), then the whole row squeezed to width 317
+      const links = document.querySelector('.links');
+      if (links) {
+        links.style.transform = 'none';
+        const linksA = links.querySelectorAll('a');
+        linksA.forEach(a => {
+          a.style.fontSize = (7.9 / 0.69) + 'px';
+        });
+        const rowW = links.getBoundingClientRect().width / k;
+        const scaleX = 317 / rowW;
+        links.style.transform = `scaleX(${scaleX})`;
+        links.style.transformOrigin = '0 50%';
+      }
+    }
+
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        fitType();
+      });
+    } else {
+      window.addEventListener('load', fitType);
+    }
+  </script>
+</body>
+</html>
