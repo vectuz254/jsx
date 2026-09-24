@@ -1,607 +1,1265 @@
-<!doctype html>
-<html lang="en-US">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Vision — Streamline the shop virtual</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Jumping — Immersive Space Portal</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    html,body{height:100%;overflow:hidden;background:#020204}
-    body{font-family:Poppins,Inter,system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased}
-    a{text-decoration:none;color:inherit}
+    @font-face {
+      font-family: 'SF Pro';
+      font-weight: 400;
+      src: local('SF Pro Text'), local('SF Pro'), local('SFProText-Regular');
+    }
+    @font-face {
+      font-family: 'SF Pro';
+      font-weight: 700;
+      src: local('SF Pro Text Bold'), local('SF Pro Bold'), local('SFProText-Bold');
+    }
+    @font-face {
+      font-family: 'SF Pro Thin';
+      font-weight: 100;
+      src: local('SF Pro Display Thin'), local('SF Pro Thin'), local('SFProDisplay-Thin');
+    }
+    @font-face {
+      font-family: 'Aalto';
+      font-weight: 400;
+      src: local('Aalto'), local('Aalto-Regular');
+    }
 
-    /* Core Architecture */
-    .stage{position:fixed;inset:0;overflow:hidden;background:#020204}
-    .canvas{position:absolute;left:50%;top:0;width:1172px;height:657px;
-      transform:translateX(-50%) scale(var(--k,1));transform-origin:50% 0}
-    .canvas>*{position:absolute}
-    .stack{position:absolute;inset:0;z-index:300}
-    .stack>*{position:absolute}
-    .navmenu{display:contents}
-    .burger{display:none}
+    :root {
+      font-family: 'SF Pro', Arial, sans-serif;
+      color: #fff;
+      background: #090807;
+      font-synthesis: none;
+    }
 
-    /* Background */
-    .bg{position:absolute;inset:0;z-index:0;
-      background:
-       linear-gradient(180deg, rgba(25,127,255,0) 38%, rgba(25,127,255,.042) 54%,
-         rgba(25,127,255,.052) 68%, rgba(25,127,255,.030) 100%),
-       #020204}
+    * {
+      box-sizing: border-box;
+    }
 
-    /* Starfield */
-    .stars{position:absolute;left:0;top:0;width:1px;height:1px;border-radius:50%;background:#fff}
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #090807;
+    }
 
-    /* Pixel Contract A — The Badge */
-    .badge{left:462px;top:95px;width:250px;height:39px;border-radius:12px;z-index:300;
-      border:1px solid rgba(255,255,255,.115);
-      background:linear-gradient(to top,
-        rgba(190,225,255,.175) 0px, rgba(190,225,255,.128) 2px, rgba(190,225,255,.075) 4px,
-        rgba(190,225,255,.026) 6px, rgba(255,255,255,.012) 9px, rgba(255,255,255,.012) 100%);
-      -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
-    .badge i{position:absolute;left:4px;top:4px;width:29px;height:29px;border-radius:8px;
-      display:grid;place-items:center;
-      background:linear-gradient(to top,
-        #46afc8 0px, #35abc7 2px, #0b859d 4px, #026c84 6px, #004e66 8px,
-        #053f58 10px, #012c3d 12px, #031a2a 14px, #061125 16px, #090f25 19px,
-        #090c1c 23px, #060d16 29px);
-      box-shadow:inset 1px 0 0 rgba(150,220,250,.40),
-        inset -1px 0 0 rgba(150,220,250,.52),
-        0 0 6px rgba(60,190,230,.20), 0 3px 8px -5px rgba(90,220,255,.6)}
-    .badge i svg{width:14px;height:16px;position:relative;top:-1px;left:0px}
-    .badge b{position:absolute;left:45px;transform-origin:0 50%;top:0;height:39px;
-      display:flex;align-items:center;
-      font-size:13px;font-weight:400;color:rgba(255,255,255,.94);white-space:nowrap;
-      padding-top:1.5px}
+    html, body, button, a, .portal {
+      cursor: none !important;
+    }
 
-    /* Pixel Contract B — The Glow Button (.btn) */
-    .btn{display:grid;place-items:center;color:#fff;position:relative;overflow:hidden;
-      background:linear-gradient(to top,
-        #9ad9ec 1px, #89dff0 2px, #79e0f1 3px, #61daef 4px, #3ec8e4 5px,
-        #14a8c6 6px, #0596b3 7px, #038aa8 8px, #047796 9px, #006180 10px,
-        #025066 12px, #0a4f5e 13px, #04465a 14px, #073746 16px,
-        #0a2a37 18px, #0d212e 20px, #0f1824 24px, #0a121e 30px,
-        #0a111d 34px, #0a111d 100%);
-      box-shadow:
-        inset 0 3px 3px -2px rgba(180,228,255,.10),
-        inset 1px 0 0 rgba(255,255,255,.09),
-        inset -1px 0 0 rgba(255,255,255,.09),
-        var(--hair,0 1px 0 rgba(152,218,234,.38)),
-        1px 0 0 rgba(152,218,234,.17), -1px 0 0 rgba(152,218,234,.17),
-        0 0 8px rgba(60,190,235,.10),
-        0 2px 5px -3px rgba(90,220,255,.45);
-      transition:transform .25s,box-shadow .25s,filter .25s;
-      cursor:pointer}
-    .btn::before{
-      content:"";position:absolute;left:22%;right:38%;top:0.8px;height:1.9px;z-index:1;
-      filter:blur(.55px);
-      background:linear-gradient(90deg,rgba(120,225,255,0) 0%,rgba(120,225,255,.58) 34%,
-        rgba(160,240,255,.74) 50%,rgba(120,225,255,.58) 66%,rgba(120,225,255,0) 100%)}
-    .btn::after{
-      content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
-      background:linear-gradient(90deg,rgba(200,245,255,.70),rgba(200,245,255,0) 13px),
-                 linear-gradient(270deg,rgba(200,245,255,.70),rgba(200,245,255,0) 13px);
-      -webkit-mask:linear-gradient(to top,#000 0,#000 6px,rgba(0,0,0,.40) 12px,
-        rgba(0,0,0,.15) 18px,rgba(0,0,0,.09) 24px,rgba(0,0,0,.02) 30px,rgba(0,0,0,.02) 100%);
-              mask:linear-gradient(to top,#000 0,#000 6px,rgba(0,0,0,.40) 12px,
-        rgba(0,0,0,.15) 18px,rgba(0,0,0,.09) 24px,rgba(0,0,0,.02) 30px,rgba(0,0,0,.02) 100%)}
-    .btn span{position:relative;z-index:2;display:block;line-height:1;
-      text-shadow:0 1px 2px rgba(0,20,30,.5)}
-    .btn:hover{transform:translateY(-1px);filter:brightness(1.12);
-      box-shadow:inset 0 1px 0 rgba(200,245,255,.6),inset 1px 0 0 rgba(170,225,255,.35),
-                 inset -1px 0 0 rgba(170,225,255,.35),0 6px 22px rgba(20,180,225,.55)}
+    .experience {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 540px;
+      overflow: hidden;
+      background: #0a0908;
+    }
 
-    /* Button instances */
-    .nav .btn{position:absolute;left:530.7px;top:10.5px;width:125.5px;height:39.5px;
-      border-radius:14px;font-size:14px;font-weight:500;letter-spacing:-.005em}
-    .nav .btn span{margin-top:0}
+    .backgrounds, .background, .shade, .transition-layer, .transition-layer video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
 
-    .cta2{position:absolute;left:526px;top:349px;width:121px;height:54.5px;
-      --hair:0 0 0 transparent;border-radius:13px;font-size:17px;font-weight:500;
-      letter-spacing:-.01em;z-index:300}
-    .cta2::before{display:none}
-    .cta2 span{margin-top:0}
+    .background {
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity .8s ease;
+    }
 
-    /* Nav Pill */
-    .nav{position:absolute;left:247px;top:3px;width:678px;height:64px;border-radius:32px;z-index:400;
-      background:rgba(255,255,255,.008);
-      border:1px solid rgba(255,255,255,.105);
-      -webkit-backdrop-filter:blur(16px) saturate(140%);
-      backdrop-filter:blur(16px) saturate(140%);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
-    .mark{position:absolute;left:21px;top:19px;width:24px;height:24px;
-      filter:drop-shadow(0 0 6px rgba(60,224,255,.75));overflow:visible}
-    .wm{position:absolute;left:50px;top:0;white-space:nowrap}
-    .wm .kick{position:absolute;left:3px;top:20px;font-size:4.4px;font-weight:600;
-      letter-spacing:.10em;color:#fff;opacity:.92;line-height:1}
-    .wm .name{position:absolute;left:0;top:26px;transform-origin:0 50%;
-      font-family:Poppins;font-weight:900;font-size:22px;line-height:1;
-      letter-spacing:-.01em;color:#fff}
-    .links{position:absolute;left:156px;top:0;height:62px;transform-origin:0 50%;
-      display:flex;align-items:center;gap:24px}
-    .links a{font-size:12.5px;font-weight:400;color:rgba(255,255,255,.92);
-      white-space:nowrap;transition:opacity .25s}
-    .links a:hover{opacity:.65}
+    .background.is-visible {
+      opacity: 1;
+    }
 
-    /* Hero Type */
-    .h1{position:absolute;left:586px;transform:translateX(-50%);white-space:nowrap;line-height:1;
-      font-family:Poppins;font-weight:900;font-size:54px;letter-spacing:-.004em;
-      word-spacing:.175em;text-transform:uppercase;color:#fff;
-      text-shadow:0 0 34px rgba(130,180,255,.22);z-index:300}
-    .sub{position:absolute;left:586px;transform:translateX(-50%);white-space:nowrap;line-height:1;
-      font-size:13.2px;color:#a9aeb5;z-index:300}
-    .sub b{font-weight:600;color:#fff}
-    .nb{white-space:nowrap}
+    .shade {
+      z-index: 1;
+      background: linear-gradient(to bottom, transparent 52%, rgba(0, 0, 0, .88) 100%);
+      pointer-events: none;
+    }
 
-    /* Showcase & Ring Carousel */
-    .showcase{position:absolute;left:0;top:0;width:1172px;height:0}
-    .ring{position:absolute;left:0;top:0;width:1172px;height:657px;z-index:5;
-      perspective:891px;perspective-origin:586px 918px;transform-style:preserve-3d;
-      pointer-events:none}
-    .card{position:absolute;left:586px;top:616px;width:130px;height:300px;
-      margin:-150px 0 0 -65px;border-radius:12px;overflow:hidden;background:#0d1117;
-      box-shadow:0 24px 46px rgba(0,0,0,.6),0 3px 8px rgba(0,0,0,.5);
-      backface-visibility:hidden;will-change:transform}
-    .card img,.card video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .card .edge{position:absolute;inset:0;border-radius:12px;pointer-events:none;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.15),
-                 inset 0 16px 30px rgba(255,255,255,.05)}
-    .card.broken img,.card.broken video{display:none}
+    .chrome {
+      position: absolute;
+      z-index: 4;
+      transition: opacity .45s ease, filter .45s ease;
+    }
 
-    /* Shared creative classes */
-    .cv{position:absolute;left:0;right:0;padding:0 10px;pointer-events:none;z-index:2}
-    .fill{position:absolute;inset:0}
-    .ph{position:absolute;left:0;right:0;overflow:hidden;
-      background:linear-gradient(155deg,#2b3b50,#131c28 60%,#1d1526)}
-    .phf{top:0;bottom:0}
-    .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .dot{display:inline-block;width:4.5px;height:4.5px;background:#e5202f;
-      margin-right:4px;transform:rotate(45deg) translateY(-1px)}
-    .dot.sq{transform:none;width:6.5px;height:4.5px;border-radius:1px}
-    .t-big{font-family:Poppins;font-weight:900;font-size:13px;line-height:1.15;color:#fff;letter-spacing:-.01em;text-transform:uppercase}
-    .t-sub{font-size:8px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:2px}
-    .t-tag{font-size:7.5px;font-weight:600;letter-spacing:0.05em;color:#fff;background:rgba(0,0,0,.45);padding:2px 6px;border-radius:4px;border:1px solid rgba(255,255,255,.12);display:inline-flex;align-items:center;backdrop-filter:blur(4px)}
-    .t-price{font-size:9.5px;font-weight:600;color:#5de4ff;margin-top:4px}
-    .t-price .old{color:rgba(255,255,255,.4);text-decoration:line-through;margin-left:4px;font-size:8px}
-    .cv.top{top:12px;display:flex;justify-content:space-between;align-items:center}
-    .cv.bot{bottom:14px;background:linear-gradient(0deg,rgba(5,8,14,.92) 0%,rgba(5,8,14,.6) 75%,transparent 100%);padding-top:20px}
+    .experience.is-transitioning .chrome {
+      opacity: 0;
+      filter: blur(8px);
+      pointer-events: none;
+    }
 
-    /* Browser Mockup */
-    .browser{position:absolute;left:165px;top:558px;width:842px;height:calc(99px + var(--fill,0px));
-      border-radius:28px 28px 0 0;z-index:100;
-      background:#090d15;
-      border:1px solid rgba(255,255,255,.13);border-bottom:none;
-      box-shadow:0 -16px 48px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.14);
-      overflow:hidden}
-    .browser-bar{position:absolute;left:0;top:0;right:0;height:42px;display:flex;align-items:center;padding:0 22px;
-      border-bottom:1px solid rgba(255,255,255,.07);background:linear-gradient(180deg,rgba(255,255,255,.025),transparent)}
-    .browser-bar .dots{display:flex;gap:7px;align-items:center}
-    .browser-bar .dots span{width:10px;height:10px;border-radius:50%;display:block}
-    .dot-r{background:#ff5f56;box-shadow:0 0 5px rgba(255,95,86,.4)}
-    .dot-y{background:#ffbd2e;box-shadow:0 0 5px rgba(255,189,46,.4)}
-    .dot-g{background:#27c93f;box-shadow:0 0 5px rgba(39,201,63,.4)}
-    .browser-bar .url-bar{margin-left:22px;height:24px;width:280px;border-radius:6px;
-      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
-      display:flex;align-items:center;padding:0 10px;font-size:11px;color:rgba(255,255,255,.6);gap:7px}
-    .browser-bar .url-bar svg{opacity:.5}
+    /* HEADER */
+    .header {
+      left: clamp(18px, 1.95vw, 28px);
+      right: clamp(18px, 1.95vw, 28px);
+      top: clamp(18px, 3.1vh, 28px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-    .page{position:absolute;left:7px;right:6px;top:42px;bottom:0;border-radius:10px 10px 0 0;
-      background:#05070c;border:1px solid rgba(255,255,255,.06);border-bottom:none;overflow:hidden;padding:16px 20px}
-    .page-nav{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:12px;margin-bottom:14px}
-    .page-brand{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#fff}
-    .page-brand span{font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(53,216,255,.15);color:#35d8ff}
-    .page-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-    .stat-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:10px 12px}
-    .stat-label{font-size:9px;color:#8f96a3;text-transform:uppercase;letter-spacing:.05em}
-    .stat-val{font-size:15px;font-weight:700;color:#fff;margin-top:2px}
-    .stat-delta{font-size:9px;color:#35d8ff;font-weight:600;margin-top:1px}
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-    /* WhatsApp Button */
-    .wa{position:absolute;right:16px;bottom:24px;width:56px;height:56px;border-radius:50%;
-      background:#25d366;z-index:300;display:grid;place-items:center;
-      box-shadow:0 6px 20px rgba(37,211,102,.35),0 2px 8px rgba(0,0,0,.4);
-      cursor:pointer;transition:transform .25s,box-shadow .25s,filter .25s}
-    .wa:hover{transform:translateY(-2px) scale(1.04);
-      box-shadow:0 8px 26px rgba(37,211,102,.5),0 4px 12px rgba(0,0,0,.5);
-      filter:brightness(1.08)}
+    .nav {
+      display: flex;
+      align-items: center;
+      height: 42px;
+      padding: 4px 5px;
+      border: 1px solid rgba(255, 255, 255, .45);
+      background: rgba(255, 255, 255, .1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 999px;
+    }
+
+    .nav a {
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 19px;
+      border-radius: 999px;
+      line-height: 1;
+      font-size: 14px;
+    }
+
+    .nav a.active {
+      background: #fff;
+      color: #000;
+    }
+
+    .menu {
+      height: 42px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 999px;
+      background: #fff;
+      color: #000;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* SIDEBAR */
+    .planet-list {
+      left: clamp(18px, 1.95vw, 28px);
+      top: 50%;
+      transform: translateY(-43%);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 16px;
+      user-select: none;
+    }
+
+    .planet-item {
+      display: flex;
+      align-items: center;
+      min-height: 20px;
+      color: rgba(255, 255, 255, .6);
+      transition: color .3s ease;
+    }
+
+    .planet-item.active {
+      font-size: 18px;
+      font-weight: 700;
+      gap: 8px;
+      color: #fff;
+    }
+
+    .planet-item.active:before {
+      content: '';
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    /* PORTAL */
+    .portal-wrap {
+      left: 50%;
+      top: 50%;
+      width: min(320px, 31vw);
+      transform: translate(-50%, -54%);
+      perspective: none;
+    }
+
+    .portal-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 16px;
+      opacity: 0;
+    }
+
+    .portal-heading strong {
+      font-size: 18px;
+      margin-left: 8px;
+    }
+
+    .portal {
+      position: relative;
+      display: block;
+      width: 100%;
+      aspect-ratio: 320 / 350;
+      padding: 0;
+      overflow: visible;
+      border: 0;
+      border-radius: 90px;
+      background: transparent;
+      cursor: pointer;
+      box-shadow: none;
+      transform: none !important;
+    }
+
+    .portal video, .portal img {
+      visibility: hidden;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+    }
+
+    .portal-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* CONTENT */
+    .planet-content {
+      left: clamp(28px, 4vw, 58px);
+      right: clamp(28px, 3vw, 44px);
+      bottom: clamp(24px, 3vh, 30px);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 40px;
+      pointer-events: none;
+    }
+
+    .planet-content h1 {
+      font-family: Aalto, 'Arial Narrow', sans-serif;
+      font-size: clamp(128px, 21.8vw, 314px);
+      font-weight: 400;
+      line-height: .72;
+      margin: 0 0 -.04em;
+      letter-spacing: 0;
+      transform: translateX(-32px);
+      opacity: 0;
+      pointer-events: auto;
+    }
+
+    .planet-content dl {
+      width: min(447px, 34vw);
+      margin: 0;
+      font-size: 16px;
+      pointer-events: auto;
+    }
+
+    .fact {
+      display: grid;
+      grid-template-columns: 138px 1fr;
+      gap: 18px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .48);
+      opacity: 0;
+    }
+
+    .fact:last-child {
+      border-bottom: 0;
+    }
+
+    .fact dt {
+      font-weight: 700;
+    }
+
+    .fact dd {
+      margin: 0;
+    }
+
+    /* MISC */
+    .transition-layer {
+      display: none;
+    }
+
+    .scene-canvas {
+      display: none;
+    }
+
+    .loading {
+      position: absolute;
+      z-index: 12;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      opacity: 0;
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      transition: opacity .2s;
+      pointer-events: none;
+    }
+
+    .experience.is-loading .loading {
+      opacity: .8;
+    }
+
+    .experience.is-transitioning .header,
+    .experience.is-transitioning .planet-list {
+      opacity: 1;
+      filter: none;
+      pointer-events: auto;
+    }
+
+    .experience.is-transitioning .shade {
+      opacity: 1;
+    }
+
+    .experience.is-committing .background {
+      transition: none !important;
+    }
+
+    /* PRELOADER */
+    .preloader {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .preloader video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preloader-shade {
+      position: absolute;
+      inset: auto 0 0;
+      height: 35%;
+      background: linear-gradient(to bottom, transparent, #000);
+    }
+
+    .preloader.is-background {
+      z-index: 0;
+    }
+
+    .preloader.is-background .preloader-shade {
+      opacity: 0;
+    }
+
+    .floating-logo {
+      position: fixed;
+      z-index: 22;
+      left: 50%;
+      top: 50%;
+      width: 59px;
+      height: 58px;
+      transform: translate(-50%, -50%);
+      will-change: left, top, width, height, transform;
+      transition: left 2s cubic-bezier(.16, 1, .3, 1),
+                  top 2s cubic-bezier(.16, 1, .3, 1),
+                  width 2s cubic-bezier(.16, 1, .3, 1),
+                  height 2s cubic-bezier(.16, 1, .3, 1),
+                  transform 2s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .floating-logo.is-docked {
+      left: clamp(18px, 1.95vw, 28px);
+      top: clamp(18px, 3.1vh, 28px);
+      width: 37px;
+      height: 36px;
+      transform: none;
+    }
+
+    .floating-logo.is-settled {
+      z-index: 5;
+    }
+
+    .preloader-count {
+      position: fixed;
+      z-index: 22;
+      left: 50%;
+      bottom: clamp(22px, 3.1vh, 28px);
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      transform: translateX(-50%);
+      font-family: 'SF Pro', Arial, sans-serif;
+      line-height: 1;
+    }
+
+    .preloader-count > span:first-child {
+      font-family: 'SF Pro Thin', 'SF Pro', Arial, sans-serif;
+      font-size: 64px;
+      font-weight: 100;
+    }
+
+    .preloader-count .percent {
+      font-size: 24px;
+      padding-bottom: 4px;
+    }
+
+    .preloader-count.is-leaving {
+      animation: preload-count-out .75s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    @keyframes preload-count-out {
+      to {
+        opacity: 0;
+        filter: blur(7px);
+        transform: translate(-50%, -34px);
+      }
+    }
+
+    body:not(.preload-complete) .custom-cursor {
+      opacity: 0 !important;
+    }
+
+    /* CUSTOM CURSOR */
+    .custom-cursor {
+      display: block;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 100;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+      will-change: transform;
+    }
+
+    .custom-cursor.is-visible {
+      opacity: 1;
+    }
+
+    .cursor-dot, .cursor-orbit {
+      position: absolute;
+      left: 0;
+      top: 0;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor-dot {
+      width: 12px;
+      height: 12px;
+      background: #fff;
+    }
+
+    .cursor-orbit {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #fff;
+      background: rgba(255, 255, 255, .4);
+      transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .custom-cursor.is-enter .cursor-orbit {
+      transform: translate(-50%, -50%) scale(1.16);
+    }
+
+    .cursor-label {
+      position: absolute;
+      top: 26px;
+      left: 0;
+      transform: translateX(-50%) translateY(-4px);
+      font: 16px / 1.2 'SF Pro', Arial, sans-serif;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .2s ease, transform .3s cubic-bezier(.22, 1, .36, 1);
+      color: #fff;
+    }
+
+    .custom-cursor.is-enter .cursor-label {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ENTRANCE / SWITCH ANIMATIONS */
+    body:not(.intro-ready) .header,
+    body:not(.intro-ready) .planet-list,
+    .planet-content h1,
+    .planet-content .fact {
+      opacity: 0;
+    }
+
+    .intro-ready .header {
+      animation: reveal-down .9s cubic-bezier(.22, 1, .36, 1) .1s both;
+    }
+
+    .intro-ready .planet-list {
+      animation: reveal-side .9s cubic-bezier(.22, 1, .36, 1) .65s both;
+    }
+
+    .content-revealing h1 {
+      animation: title-rise 1.05s cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    .content-revealing .fact {
+      animation: fact-rise .72s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    .content-revealing .fact:nth-child(1) { animation-delay: .52s; }
+    .content-revealing .fact:nth-child(2) { animation-delay: .68s; }
+    .content-revealing .fact:nth-child(3) { animation-delay: .84s; }
+    .content-revealing .fact:nth-child(4) { animation-delay: 1s; }
+
+    .mask-revealing .portal-heading {
+      animation: portal-caption .85s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    .planet-list.is-switching .planet-item {
+      animation: menu-row .58s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    .planet-list.is-switching .planet-item:nth-child(1) { animation-delay: .02s; }
+    .planet-list.is-switching .planet-item:nth-child(2) { animation-delay: .05s; }
+    .planet-list.is-switching .planet-item:nth-child(3) { animation-delay: .08s; }
+    .planet-list.is-switching .planet-item:nth-child(4) { animation-delay: .11s; }
+    .planet-list.is-switching .planet-item:nth-child(5) { animation-delay: .14s; }
+    .planet-list.is-switching .planet-item:nth-child(6) { animation-delay: .17s; }
+    .planet-list.is-switching .planet-item:nth-child(7) { animation-delay: .2s; }
+    .planet-list.is-switching .planet-item:nth-child(8) { animation-delay: .23s; }
+
+    .planet-list.is-switching .planet-item.active:before {
+      animation: active-dot .55s cubic-bezier(.22, 1, .36, 1) .18s both;
+    }
+
+    @keyframes reveal-down {
+      from { opacity: 0; filter: blur(8px); transform: translateY(-18px); }
+      to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
+    }
+
+    @keyframes reveal-side {
+      from { opacity: 0; filter: blur(8px); transform: translate(-20px, -43%); }
+      to   { opacity: 1; filter: blur(0);   transform: translate(0, -43%); }
+    }
+
+    @keyframes title-rise {
+      from { opacity: 0; filter: blur(12px); transform: translate(-32px, 42px); }
+      to   { opacity: 1; filter: blur(0);    transform: translate(-32px, 0); }
+    }
+
+    @keyframes fact-rise {
+      from { opacity: 0; filter: blur(7px); transform: translateY(18px); }
+      to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
+    }
+
+    @keyframes portal-caption {
+      from { opacity: 0; filter: blur(7px); transform: translateY(22px); }
+      to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
+    }
+
+    @keyframes menu-row {
+      from { opacity: .35; transform: translateX(-8px); }
+      to   { opacity: 1;   transform: translateX(0); }
+    }
+
+    @keyframes active-dot {
+      from { opacity: 0; transform: scale(0); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .nav { display: none; }
+      .portal-wrap { width: min(300px, 48vw); }
+      .planet-content h1 { font-size: clamp(105px, 24vw, 190px); }
+      .planet-content dl { width: 43vw; }
+      .fact { grid-template-columns: 110px 1fr; }
+      .planet-list { font-size: 14px; }
+      .planet-item.active { font-size: 16px; }
+    }
+
+    @media (max-width: 640px) {
+      .experience { min-height: 600px; }
+      .planet-list { display: none; }
+      .portal-wrap { top: 44%; width: min(260px, 66vw); }
+      .planet-content { left: 18px; right: 18px; bottom: 18px; display: block; }
+      .planet-content h1 { font-size: clamp(98px, 30vw, 160px); margin-bottom: 20px; }
+      .planet-content dl { width: 100%; font-size: 13px; }
+      .fact { grid-template-columns: 92px 1fr; padding: 5px 0; }
+      .portal-heading { font-size: 14px; }
+      .portal-heading strong { font-size: 16px; }
+      .menu { height: 38px; }
+      .portal { border-radius: 70px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition-duration: .01ms !important; }
+      .portal { transform: none !important; }
+    }
   </style>
 </head>
 <body>
-  <div class="stage">
-    <!-- Stage Background & Starfields -->
-    <div class="bg">
-      <div class="stars" id="stA"></div>
-      <div class="stars" id="stB"></div>
-    </div>
-
-    <!-- Scaled Canvas -->
-    <div class="canvas">
-      <!-- 3D Ring Showcase -->
-      <div class="showcase">
-        <div class="ring" id="ring"></div>
-      </div>
-
-      <!-- Browser Mockup -->
-      <div class="browser">
-        <div class="browser-bar">
-          <div class="dots">
-            <span class="dot-r"></span>
-            <span class="dot-y"></span>
-            <span class="dot-g"></span>
-          </div>
-          <div class="url-bar">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-            </svg>
-            vertex.shop/live/atelier-store
-          </div>
-        </div>
-        <div class="page">
-          <div class="page-nav">
-            <div class="page-brand">
-              <strong>VERTEX CORE</strong>
-              <span>ENTERPRISE STORE</span>
-            </div>
-            <div style="font-size:10px;color:rgba(255,255,255,.6);display:flex;gap:14px;">
-              <span>Realtime Synced</span>
-              <span style="color:#27c93f;">● System Optimal</span>
-            </div>
-          </div>
-          <div class="page-stats">
-            <div class="stat-card">
-              <div class="stat-label">Net Sales 24h</div>
-              <div class="stat-val">$184,920</div>
-              <div class="stat-delta">+34.8% vs avg</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Checkout Latency</div>
-              <div class="stat-val">38ms</div>
-              <div class="stat-delta">p99 global edge</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Active Buyers</div>
-              <div class="stat-val">4,819</div>
-              <div class="stat-delta">62 countries</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Conversion Rate</div>
-              <div class="stat-val">4.92%</div>
-              <div class="stat-delta">+1.4% instant pay</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Foreground Stack -->
-      <div class="stack">
-        <!-- Nav Pill -->
-        <nav class="nav">
-          <svg class="mark" viewBox="0 0 48 48">
-            <defs>
-              <linearGradient id="sw" x1="8" y1="8" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#8ef4ff"/>
-                <stop offset="50%" stop-color="#35d8ff"/>
-                <stop offset="100%" stop-color="#0a86d8"/>
-              </linearGradient>
-              <linearGradient id="sw2" x1="40" y1="10" x2="10" y2="40" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#a6f7ff"/>
-                <stop offset="100%" stop-color="#0f9ae0" stop-opacity="0.25"/>
-              </linearGradient>
-            </defs>
-            <g transform="rotate(-32 24 24)">
-              <ellipse cx="24" cy="24" rx="18.5" ry="9.6" fill="none" stroke="url(#sw2)" stroke-width="3.1" stroke-linecap="round" stroke-dasharray="58 30" stroke-dashoffset="14"/>
-              <circle cx="41.4" cy="20.6" r="3.1" fill="#bff6ff"/>
-            </g>
-            <circle cx="24" cy="24" r="6.6" fill="url(#sw)"/>
-            <circle cx="24" cy="24" r="2.6" fill="#fff"/>
-          </svg>
-          <div class="wm">
-            <div class="kick">SHOPS</div>
-            <div class="name" id="wmName">VERTEX</div>
-          </div>
-          <div class="navmenu">
-            <div class="links">
-              <a href="#">Origin</a>
-              <a href="#">Learn how</a>
-              <a href="#">Core Vertex</a>
-              <a href="#">Prices</a>
-              <a href="#">Support</a>
-            </div>
-            <a class="btn" href="#"><span id="ctaLabel">Build new shop</span></a>
-          </div>
-        </nav>
-
-        <!-- Badge (Contract A) -->
-        <div class="badge">
-          <i>
-            <svg viewBox="5 1 14 22" preserveAspectRatio="none" fill="rgba(16,112,152,.72)" stroke="rgba(190,236,255,.6)" stroke-width="1.6" stroke-linejoin="round">
-              <path d="M13.9 1.6 5.5 13.6a.7.7 0 0 0 .6 1.1h4.2l-1 7.7a.7.7 0 0 0 1.25.55l8.3-12.1a.7.7 0 0 0-.6-1.1h-4.2l1-7.7a.7.7 0 0 0-1.25-.55Z"/>
-            </svg>
-          </i>
-          <b id="badgeTxt">Professionals at store startup</b>
-        </div>
-
-        <!-- Hero Type -->
-        <h1 class="h1" id="h1a">Streamline the shop</h1>
-        <h1 class="h1" id="h1b">Process</h1>
-        <p class="sub" id="sub1"><b>Restructuring store systems / <span class="nb">E-commerce</span></b> orchestrated with</p>
-        <p class="sub" id="sub2">checkouts, performance, a sustainable expansion.</p>
-
-        <!-- Hero CTA (Contract B) -->
-        <a class="btn cta2" href="#"><span id="vpLabel">See prices</span></a>
-      </div>
-    </div>
-
-    <!-- WhatsApp widget outside canvas -->
-    <a class="wa" href="#" aria-label="WhatsApp">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
-        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.04 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.16 12.04 20.16C10.64 20.16 9.26 19.8 8.05 19.09L7.76 18.92L4.66 19.73L5.49 16.71L5.3 16.41C4.51 15.15 4.09 13.56 4.09 11.92C4.09 7.38 7.79 3.67 12.04 3.67ZM8.83 7.37C8.65 7.37 8.35 7.44 8.1 7.71C7.86 7.98 7.18 8.62 7.18 9.92C7.18 11.22 8.13 12.47 8.26 12.65C8.4 12.83 10.11 15.48 12.75 16.61C14.94 17.55 15.38 17.36 15.86 17.32C16.34 17.27 17.41 16.68 17.63 16.05C17.85 15.42 17.85 14.88 17.78 14.77C17.71 14.66 17.53 14.6 17.26 14.46C17 14.33 15.7 13.69 15.46 13.6C15.22 13.51 15.05 13.47 14.87 13.74C14.7 14.01 14.2 14.6 14.05 14.77C13.9 14.95 13.75 14.97 13.48 14.84C13.21 14.7 12.35 14.42 11.33 13.51C10.54 12.8 10 11.93 9.85 11.66C9.7 11.39 9.83 11.25 9.97 11.11C10.1 10.98 10.25 10.78 10.39 10.62C10.53 10.45 10.57 10.34 10.66 10.16C10.75 9.98 10.71 9.83 10.64 9.69C10.57 9.56 10.05 8.28 9.83 7.76C9.62 7.25 9.4 7.32 9.24 7.32C9.09 7.31 8.91 7.31 8.83 7.37Z"/>
-      </svg>
-    </a>
+<main class="experience" data-planet="mars">
+  <div class="backgrounds" aria-hidden="true">
+    <video id="mars-background"  class="background is-visible" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/3c83091e-4046-4fd6-adbb-2edb728be79a.mp4" muted playsinline preload="auto"></video>
+    <video id="earth-background" class="background"            src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/fc3ded42-e845-41f3-a830-5cab512d79cd.mp4" muted playsinline preload="auto"></video>
+    <video id="venus-background" class="background"            src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/b30f64d9-1637-477a-83df-d0fc6461a422.mp4" muted playsinline preload="auto"></video>
   </div>
+  <div class="preloader" id="preloader" aria-label="Loading Mars">
+    <video id="preloader-video" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/5fc5651c-3b5d-4171-b507-87f7e635d1b4.mp4" muted playsinline preload="auto"></video>
+    <div class="preloader-shade"></div>
+  </div>
+  <img class="floating-logo" id="floating-logo" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/eb7e0f53-50cd-4af5-abc4-8b9a52cdc01b.svg" alt="Ubernatural">
+  <div class="preloader-count" id="preloader-count" aria-live="polite">
+    <span id="preloader-value">0</span><span class="percent">%</span>
+  </div>
+  <canvas id="scene-canvas" class="scene-canvas" aria-hidden="true"></canvas>
+  <div class="shade" aria-hidden="true"></div>
 
-  <script>
-    /* Starfield Generation */
-    function genStars(id, count, blur, minAlpha, maxAlpha) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const shadows = [];
-      for (let i = 0; i < count; i++) {
-        const x = (Math.random() * 100).toFixed(2);
-        const y = (Math.random() * 100).toFixed(2);
-        const a = (minAlpha + Math.random() * (maxAlpha - minAlpha)).toFixed(3);
-        shadows.push(`${x}vw ${y}vh ${blur}px 0 rgba(255,255,255,${a})`);
-      }
-      el.style.boxShadow = shadows.join(', ');
-    }
-    genStars('stA', 150, 0, 0.05, 0.30);
-    genStars('stB', 18, 1.2, 0.35, 0.70);
+  <header class="header chrome">
+    <div class="header-actions">
+      <nav class="nav" aria-label="Primary navigation">
+        <a class="active" href="#about">About</a><a href="#explore">Explore</a><a href="#planets">Planets</a>
+      </nav>
+      <button class="menu" type="button">Menu</button>
+    </div>
+  </header>
 
-    /* Scale Law & Fill Calculation */
-    function updateScale() {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const W = 1172;
-      const k = Math.min(vw / W, vh / 560);
-      document.documentElement.style.setProperty('--k', k);
-      const fill = Math.max(0, (vh / k) - 657);
-      document.documentElement.style.setProperty('--fill', fill + 'px');
-    }
-    window.addEventListener('resize', () => {
-      updateScale();
-      fitType();
-    });
-    updateScale();
+  <aside class="planet-list chrome" aria-label="Planets"></aside>
 
-    /* 3D Ring Carousel Setup & Animation */
-    const ring = document.getElementById('ring');
-    const R = 891;
-    const n = 37;
-    const step = 360 / n;
-    const cullAngle = 42;
-    let phase = -2;
-    let last = performance.now();
+  <canvas id="portal-canvas" class="portal-canvas" aria-hidden="true"></canvas>
+  <section class="portal-wrap chrome" aria-label="Next destination">
+    <div class="portal-heading">
+      <span>Next:</span>
+      <span><span id="next-number">[03]</span> <strong id="next-name">Earth</strong></span>
+    </div>
+    <button class="portal" id="portal" type="button" aria-label="Travel to Earth">
+      <video id="portal-video" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/fc3ded42-e845-41f3-a830-5cab512d79cd.mp4" muted playsinline preload="auto"></video>
+      <img id="portal-image" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/d6fb8b6b-c15e-4aaa-9cf7-45bbb5e33372.jpg" alt="Mercury">
+    </button>
+  </section>
 
-    const sampleThemes = [
-      { name: "ATELIER LUX", sub: "Haute Couture", price: "$340", grad: "linear-gradient(155deg,#34223f,#151024 60%,#0e0a16)" },
-      { name: "NEO AUDIO", sub: "Acoustics 01", price: "$290", grad: "linear-gradient(155deg,#1c3345,#0b1a26 60%,#09131d)" },
-      { name: "CERAMIC LAB", sub: "Handcrafted", price: "$85", grad: "linear-gradient(155deg,#3c362d,#231d16 60%,#16120d)" },
-      { name: "CYBER EYEWEAR", sub: "Titanium Frame", price: "$420", grad: "linear-gradient(155deg,#1d3e3a,#0b2320 60%,#091816)" },
-      { name: "VELOX CHRONO", sub: "Automatic 41mm", price: "$1,250", grad: "linear-gradient(155deg,#2e2840,#191328 60%,#110a1c)" },
-      { name: "KINETIC RUN", sub: "Zero Gravity", price: "$195", grad: "linear-gradient(155deg,#422424,#251010 60%,#190a0a)" },
-      { name: "PURE BOTANIC", sub: "Essence Serum", price: "$110", grad: "linear-gradient(155deg,#203b30,#0d2219 60%,#091811)" }
-    ];
+  <section class="planet-content chrome" aria-live="polite">
+    <h1 id="planet-title">MARS</h1>
+    <dl id="facts"></dl>
+  </section>
 
-    const cards = [];
-    for (let i = 0; i < n; i++) {
-      const card = document.createElement('div');
-      card.className = 'card';
-      const theme = sampleThemes[i % sampleThemes.length];
-      const dotType = (i % 3 === 0) ? 'dot sq' : 'dot';
-      const tagText = (i % 2 === 0) ? 'VERIFIED' : 'FEATURED';
+  <div class="transition-layer" aria-hidden="true"><video id="transition-video" muted playsinline preload="auto"></video></div>
+  <div class="loading" aria-hidden="true">Preparing orbit…</div>
+  <div class="custom-cursor" aria-hidden="true">
+    <span class="cursor-orbit"></span><span class="cursor-dot"></span><span class="cursor-label">Enter</span>
+  </div>
+</main>
 
-      card.innerHTML = `
-        <div class="fill ph phf" style="background:${theme.grad};">
-          <video class="fill" muted loop playsinline preload="none"
-            data-src="https://your-cdn.example.com/shops/card-${i+1}.mp4"
-            onerror="this.closest('.card').classList.add('broken')"></video>
-        </div>
-        <div class="cv top">
-          <span class="t-tag"><span class="${dotType}"></span>${tagText}</span>
-        </div>
-        <div class="cv bot">
-          <div class="t-sub">${theme.sub}</div>
-          <div class="t-big">${theme.name}</div>
-          <div class="t-price">${theme.price} <span class="old">$${parseInt(theme.price.replace(/[$,]/g,''))+75}</span></div>
-        </div>
-        <div class="edge"></div>
-      `;
-      ring.appendChild(card);
-      cards.push(card);
-    }
+<script>
+(() => {
+  'use strict';
 
-    function renderCarousel(t) {
-      const dt = Math.min((t - last) / 1000, 0.1);
-      last = t;
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        phase -= 1.9 * dt;
-      }
-      for (let i = 0; i < n; i++) {
-        const el = cards[i];
-        let a = ((i * step + phase) % 360 + 540) % 360 - 180;
-        const video = el.querySelector('video');
-        if (Math.abs(a) > cullAngle) {
-          el.style.visibility = 'hidden';
-          if (video && video.src) {
-            video.pause();
-            video.removeAttribute('src');
-            video.load();
-          }
-          continue;
-        }
-        el.style.visibility = 'visible';
-        if (video && !video.src) {
-          video.src = video.dataset.src;
-          video.play().catch(() => {});
-        }
-        const r = a * Math.PI / 180;
-        const c = Math.cos(r);
-        const x = (R * Math.sin(r)).toFixed(2);
-        const z = (R * (1 - c)).toFixed(2);
-        const rot = (-a).toFixed(2);
-        const b = (0.84 + 0.5 * (1 / c - 1)).toFixed(3);
-        el.style.transform = `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
-        el.style.filter = `brightness(${b})`;
-      }
-      requestAnimationFrame(renderCarousel);
-    }
-    requestAnimationFrame(renderCarousel);
+  const BASE = 'https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P';
+  const MARS_BG   = `${BASE}/3c83091e-4046-4fd6-adbb-2edb728be79a.mp4`;
+  const TO_EARTH  = `${BASE}/fc3ded42-e845-41f3-a830-5cab512d79cd.mp4`;
+  const TO_VENUS  = `${BASE}/b30f64d9-1637-477a-83df-d0fc6461a422.mp4`;
+  const TO_MARS   = `${BASE}/5fc5651c-3b5d-4171-b507-87f7e635d1b4.mp4`;
+  const MERCURY   = `${BASE}/d6fb8b6b-c15e-4aaa-9cf7-45bbb5e33372.jpg`;
+  const LOGO      = `${BASE}/eb7e0f53-50cd-4af5-abc4-8b9a52cdc01b.svg`;
 
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) last = performance.now();
-    });
+  const planets = ['Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune'];
 
-    /* Type Fitter (§11 & §1.5) */
-    function fitType() {
-      const k = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--k')) || 1;
+  const states = {
+    mars:  { name:'Mars',  next:'Earth',   number:'[03]', portal:TO_EARTH,  background:'mars-background',
+      facts:[['Distance:','About 228 million km (1.5 astronomical units).'],
+             ['Year:','One Martian year is equal to 687 Earth days.'],
+             ['Temperature:','Around -60 °C, dropping to -125 °C at the poles in winter.'],
+             ['Atmosphere:','Very thin, consisting of 95% carbon dioxide, with frequent dust storms.']] },
+    earth: { name:'Earth', next:'Venus',   number:'[02]', portal:TO_VENUS,  background:'earth-background',
+      facts:[['Distance:','149.6 million km from the Sun.'],
+             ['Year:','365.25 Earth days.'],
+             ['Temperature:','Average surface temperature around 15 °C.'],
+             ['Atmosphere:','Mostly nitrogen and oxygen, supporting life and liquid water.']] },
+    venus: { name:'Venus', next:'Mercury', number:'[06]', image:MERCURY,    background:'venus-background',
+      facts:[['Distance:','108.2 million km from the Sun.'],
+             ['Year:','225 Earth days.'],
+             ['Temperature:','Around 465 °C — the hottest planet in the Solar System.'],
+             ['Atmosphere:','Extremely dense, mostly carbon dioxide, with clouds of sulfuric acid.']] }
+  };
 
-      function measureBaselineOffset(el) {
-        const probe = document.createElement('span');
-        probe.style.display = 'inline-block';
-        probe.style.width = '0px';
-        probe.style.height = '0px';
-        probe.style.verticalAlign = 'baseline';
-        el.appendChild(probe);
-        const probeBottom = probe.getBoundingClientRect().bottom;
-        const elTop = el.getBoundingClientRect().top;
-        probe.remove();
-        return (probeBottom - elTop) / k;
-      }
+  let current = 'mars';
+  let busy = true;
+  let isFirstRender = true;
 
-      // #h1a: first baseline y 204.5, ink width 563.5, cap height 37.2
-      const h1a = document.getElementById('h1a');
-      if (h1a) {
-        h1a.style.transform = 'translateX(-50%)';
-        h1a.style.top = '165px';
-        const rectW = h1a.getBoundingClientRect().width / k;
-        const scaleX = 563.5 / rectW;
-        const bOffset = measureBaselineOffset(h1a);
-        const topY = 204.5 - bOffset;
-        h1a.style.top = topY + 'px';
-        h1a.style.transform = `translateX(-50%) scaleX(${scaleX})`;
-        h1a.style.transformOrigin = '50% 0';
-      }
+  // DOM elements
+  const experienceEl = document.querySelector('.experience');
+  const planetTitleEl = document.getElementById('planet-title');
+  const nextNameEl = document.getElementById('next-name');
+  const nextNumberEl = document.getElementById('next-number');
+  const portalBtn = document.getElementById('portal');
+  const factsEl = document.getElementById('facts');
+  const planetListEl = document.querySelector('.planet-list');
+  const portalVideo = document.getElementById('portal-video');
+  const portalImage = document.getElementById('portal-image');
+  const transitionVideo = document.getElementById('transition-video');
+  const portalCanvas = document.getElementById('portal-canvas');
+  const sceneCanvas = document.getElementById('scene-canvas');
+  const ctx = portalCanvas.getContext('2d');
+  const preloaderEl = document.getElementById('preloader');
+  const preloaderVideo = document.getElementById('preloader-video');
+  const preloaderVal = document.getElementById('preloader-value');
+  const preloaderCount = document.getElementById('preloader-count');
+  const floatingLogo = document.getElementById('floating-logo');
+  const cursorEl = document.querySelector('.custom-cursor');
+  const cursorDot = document.querySelector('.cursor-dot');
+  const cursorOrbit = document.querySelector('.cursor-orbit');
 
-      // #h1b: first baseline y 258.5, ink width 197.5, cap height 37.2
-      const h1b = document.getElementById('h1b');
-      if (h1b) {
-        h1b.style.transform = 'translateX(-50%)';
-        h1b.style.top = '220px';
-        const rectW = h1b.getBoundingClientRect().width / k;
-        const scaleX = 197.5 / rectW;
-        const bOffset = measureBaselineOffset(h1b);
-        const topY = 258.5 - bOffset;
-        h1b.style.top = topY + 'px';
-        h1b.style.transform = `translateX(-50%) scaleX(${scaleX})`;
-        h1b.style.transformOrigin = '50% 0';
-      }
+  // Animation & 3D state
+  let hasFrozenScene = false;
+  let transitionActive = false;
+  let expansion = 0;
+  let maskScale = 0;
+  let canvasOpacity = 1;
 
-      // #sub1: first baseline y 300.5, ink width 389, cap height 8.4
-      const sub1 = document.getElementById('sub1');
-      if (sub1) {
-        sub1.style.transform = 'translateX(-50%)';
-        sub1.style.top = '285px';
-        const rectW = sub1.getBoundingClientRect().width / k;
-        const scaleX = 389 / rectW;
-        const bOffset = measureBaselineOffset(sub1);
-        const topY = 300.5 - bOffset;
-        sub1.style.top = topY + 'px';
-        sub1.style.transform = `translateX(-50%) scaleX(${scaleX})`;
-        sub1.style.transformOrigin = '50% 0';
-      }
+  let targetX = 0;
+  let targetY = 0;
+  let rotX = 0;
+  let rotY = 0;
+  let lastTime = performance.now();
 
-      // #sub2: first baseline y 316.5, ink width 311, cap height 8.4
-      const sub2 = document.getElementById('sub2');
-      if (sub2) {
-        sub2.style.transform = 'translateX(-50%)';
-        sub2.style.top = '300px';
-        const rectW = sub2.getBoundingClientRect().width / k;
-        const scaleX = 311 / rectW;
-        const bOffset = measureBaselineOffset(sub2);
-        const topY = 316.5 - bOffset;
-        sub2.style.top = topY + 'px';
-        sub2.style.transform = `translateX(-50%) scaleX(${scaleX})`;
-        sub2.style.transformOrigin = '50% 0';
-      }
+  // Custom cursor state
+  let pointerX = -100;
+  let pointerY = -100;
+  let orbitX = -100;
+  let orbitY = -100;
+  let cursorVisible = false;
 
-      // #wmName: ink 51, cap 11.4, first baseline y 38.5
-      const wmName = document.getElementById('wmName');
-      if (wmName) {
-        wmName.style.transform = 'none';
-        wmName.style.top = '26px';
-        const rectW = wmName.getBoundingClientRect().width / k;
-        const scale = 51 / rectW;
-        const bOffset = measureBaselineOffset(wmName);
-        const topY = 38.5 - (bOffset * scale);
-        wmName.style.top = topY + 'px';
-        wmName.style.transform = `scale(${scale})`;
-        wmName.style.transformOrigin = '0 50%';
-      }
+  // Render state to DOM
+  function render() {
+    const state = states[current];
+    experienceEl.dataset.planet = current;
+    planetTitleEl.textContent = state.name.toUpperCase();
+    nextNameEl.textContent = state.next;
+    nextNumberEl.textContent = state.number;
+    portalBtn.setAttribute('aria-label', `Travel to ${state.next}`);
 
-      // #badgeTxt: ink 184, cap 9.4, transform pre 'translate(2px,-1px)'
-      const badgeTxt = document.getElementById('badgeTxt');
-      if (badgeTxt) {
-        badgeTxt.style.transform = 'none';
-        const rectW = badgeTxt.getBoundingClientRect().width / k;
-        const scale = 184 / rectW;
-        badgeTxt.style.transform = `translate(2px, -1px) scale(${scale})`;
-        badgeTxt.style.transformOrigin = '0 50%';
-      }
+    factsEl.innerHTML = state.facts.map(([k, v]) =>
+      `<div class="fact"><dt>${k}</dt><dd>${v}</dd></div>`
+    ).join('');
 
-      // #ctaLabel: ink 87, cap 8.9, then optically centred in its button
-      const ctaLabel = document.getElementById('ctaLabel');
-      if (ctaLabel) {
-        ctaLabel.style.transform = 'none';
-        const rectW = ctaLabel.getBoundingClientRect().width / k;
-        const scale = 87 / rectW;
-        ctaLabel.style.transform = `scale(${scale})`;
-        ctaLabel.style.transformOrigin = '50% 50%';
-      }
+    planetListEl.innerHTML = planets.map(p => {
+      const isActive = p.toLowerCase() === current.toLowerCase();
+      return `<span class="planet-item${isActive ? ' active' : ''}">${p}</span>`;
+    }).join('');
 
-      // #vpLabel: ink 76, cap 9.5, then optically centred in its button
-      const vpLabel = document.getElementById('vpLabel');
-      if (vpLabel) {
-        vpLabel.style.transform = 'none';
-        const rectW = vpLabel.getBoundingClientRect().width / k;
-        const scale = 76 / rectW;
-        vpLabel.style.transform = `scale(${scale})`;
-        vpLabel.style.transformOrigin = '50% 50%';
-      }
-
-      // .links a: cap 7.9 (one shared size), then the whole row squeezed to width 317
-      const links = document.querySelector('.links');
-      if (links) {
-        links.style.transform = 'none';
-        const linksA = links.querySelectorAll('a');
-        linksA.forEach(a => {
-          a.style.fontSize = (7.9 / 0.69) + 'px';
-        });
-        const rowW = links.getBoundingClientRect().width / k;
-        const scaleX = 317 / rowW;
-        links.style.transform = `scaleX(${scaleX})`;
-        links.style.transformOrigin = '0 50%';
-      }
-    }
-
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        fitType();
-      });
+    if (isFirstRender) {
+      isFirstRender = false;
     } else {
-      window.addEventListener('load', fitType);
+      planetListEl.classList.remove('is-switching');
+      void planetListEl.offsetWidth;
+      planetListEl.classList.add('is-switching');
     }
-  </script>
+
+    document.querySelectorAll('.background').forEach(bg => {
+      if (bg.id === state.background) {
+        bg.classList.add('is-visible');
+      } else {
+        bg.classList.remove('is-visible');
+      }
+    });
+
+    if (state.image) {
+      portalImage.style.display = '';
+      portalVideo.style.display = 'none';
+    } else {
+      portalImage.style.display = 'none';
+      portalVideo.style.display = '';
+      if (portalVideo.getAttribute('src') !== state.portal) {
+        portalVideo.src = state.portal;
+        portalVideo.load();
+      }
+      portalVideo.loop = true;
+      portalVideo.play().catch(() => {});
+    }
+  }
+
+  // Canvas resize
+  function resizeCanvas() {
+    const d = Math.min(window.devicePixelRatio || 1, 2);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    portalCanvas.width = w * d;
+    portalCanvas.height = h * d;
+    portalCanvas.style.width = w + 'px';
+    portalCanvas.style.height = h + 'px';
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+
+    if (!hasFrozenScene) {
+      sceneCanvas.width = w * d;
+      sceneCanvas.height = h * d;
+      sceneCanvas.style.width = w + 'px';
+      sceneCanvas.style.height = h + 'px';
+      const sceneCtx = sceneCanvas.getContext('2d');
+      sceneCtx.setTransform(d, 0, 0, d, 0, 0);
+    }
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+
+  // Draw media cover
+  function drawCover(media, targetCtx = ctx) {
+    if (!media) return;
+    const mw = media.videoWidth || media.naturalWidth || media.width || 1920;
+    const mh = media.videoHeight || media.naturalHeight || media.height || 1080;
+    if (!mw || !mh) return;
+    const scale = Math.max(window.innerWidth / mw, window.innerHeight / mh);
+    const w = mw * scale;
+    const h = mh * scale;
+    const x = (window.innerWidth - w) / 2;
+    const y = (window.innerHeight - h) / 2;
+    try {
+      targetCtx.drawImage(media, x, y, w, h);
+    } catch (err) {
+      // frame might not be decoded yet
+    }
+  }
+
+  // Draw shade gradient
+  function drawShade(targetCtx = ctx) {
+    const y0 = window.innerHeight * 0.52;
+    const y1 = window.innerHeight;
+    const grad = targetCtx.createLinearGradient(0, y0, 0, y1);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.88)');
+    targetCtx.fillStyle = grad;
+    targetCtx.fillRect(0, y0, window.innerWidth, y1 - y0);
+  }
+
+  // Easing function: easeInOutCubic
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function animateValue(setter, duration) {
+    return new Promise(resolve => {
+      const startTime = performance.now();
+      function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, Math.max(0, elapsed / duration));
+        const val = easeInOutCubic(progress);
+        setter(val);
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          setter(1);
+          resolve();
+        }
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  // Pointer tilt tracking
+  window.addEventListener('pointermove', e => {
+    if (busy) return;
+    targetY = (e.clientX / window.innerWidth - 0.5) * 37.4;
+    targetX = (e.clientY / window.innerHeight - 0.5) * -33;
+  });
+
+  window.addEventListener('pointerleave', () => {
+    if (busy) return;
+    targetX = 0;
+    targetY = 0;
+  });
+
+  // Reveal animations
+  function revealMask() {
+    experienceEl.classList.remove('mask-revealing');
+    void experienceEl.offsetWidth;
+    experienceEl.classList.add('mask-revealing');
+    maskScale = 0;
+    return animateValue(v => { maskScale = v; }, 1050);
+  }
+
+  function revealPlanetContent() {
+    experienceEl.classList.remove('content-revealing');
+    void experienceEl.offsetWidth;
+    experienceEl.classList.add('content-revealing');
+  }
+
+  function waitForPortalMedia() {
+    return new Promise(resolve => {
+      const state = states[current];
+      if (state.image) {
+        if (portalImage.complete && portalImage.naturalWidth > 0) {
+          resolve();
+        } else {
+          portalImage.addEventListener('load', resolve, { once: true });
+          portalImage.addEventListener('error', resolve, { once: true });
+          setTimeout(resolve, 1600);
+        }
+      } else {
+        if (portalVideo.readyState >= 2) {
+          resolve();
+        } else {
+          const onDone = () => {
+            portalVideo.removeEventListener('canplay', onDone);
+            portalVideo.removeEventListener('loadeddata', onDone);
+            portalVideo.removeEventListener('error', onDone);
+            resolve();
+          };
+          portalVideo.addEventListener('canplay', onDone, { once: true });
+          portalVideo.addEventListener('loadeddata', onDone, { once: true });
+          portalVideo.addEventListener('error', onDone, { once: true });
+          setTimeout(resolve, 1600);
+        }
+      }
+    });
+  }
+
+  async function startExperience() {
+    const marsBg = document.getElementById('mars-background');
+    if (marsBg) {
+      marsBg.loop = true;
+      marsBg.play().catch(() => {});
+    }
+    await waitForPortalMedia();
+    await revealMask();
+    document.body.classList.add('intro-ready');
+    setTimeout(() => {
+      revealPlanetContent();
+      busy = false;
+    }, 850);
+  }
+
+  // Main portal render loop
+  function draw() {
+    const now = performance.now();
+    const dt = Math.min(40, Math.max(0, now - lastTime));
+    lastTime = now;
+
+    rotX += (targetX - rotX) * Math.min(1, dt * 0.009);
+    rotY += (targetY - rotY) * Math.min(1, dt * 0.009);
+
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    if (hasFrozenScene) {
+      ctx.drawImage(sceneCanvas, 0, 0, window.innerWidth, window.innerHeight);
+      drawShade(ctx);
+    }
+
+    const rect = portalBtn.getBoundingClientRect();
+    const e = expansion;
+    const rectCx = rect.left + rect.width / 2;
+    const rectCy = rect.top + rect.height / 2;
+
+    const cx = rectCx + (window.innerWidth / 2 - rectCx) * e;
+    const cy = rectCy + (window.innerHeight / 2 - rectCy) * e;
+
+    const baseW = rect.width + (window.innerWidth - rect.width) * e;
+    const baseH = rect.height + (window.innerHeight - rect.height) * e;
+
+    const scale = e ? 1 : maskScale;
+    const w = baseW * scale;
+    const h = baseH * scale;
+
+    const r = 90 * (1 - e) * scale;
+    const rx = rotX * (1 - e);
+    const ry = rotY * (1 - e);
+
+    if (w > 1 && h > 1) {
+      const clampedR = Math.max(0, Math.min(r, w / 2, h / 2));
+      const corners = [
+        [ w / 2 - clampedR, -h / 2 + clampedR, -Math.PI / 2, 0 ],
+        [ w / 2 - clampedR,  h / 2 - clampedR, 0, Math.PI / 2 ],
+        [-w / 2 + clampedR,  h / 2 - clampedR, Math.PI / 2, Math.PI ],
+        [-w / 2 + clampedR, -h / 2 + clampedR, Math.PI, Math.PI * 1.5 ]
+      ];
+
+      const points = [];
+      for (let c = 0; c < 4; c++) {
+        const [ccx, ccy, a0, a1] = corners[c];
+        for (let s = 0; s <= 10; s++) {
+          const th = a0 + (a1 - a0) * (s / 10);
+          points.push([ccx + clampedR * Math.cos(th), ccy + clampedR * Math.sin(th)]);
+        }
+      }
+
+      const ax = rx * Math.PI / 180;
+      const ay = ry * Math.PI / 180;
+      const cosAx = Math.cos(ax);
+      const sinAx = Math.sin(ax);
+      const cosAy = Math.cos(ay);
+      const sinAy = Math.sin(ay);
+
+      ctx.save();
+      ctx.globalAlpha = canvasOpacity;
+      ctx.beginPath();
+      for (let i = 0; i < points.length; i++) {
+        const [px, py] = points[i];
+        const xx = px * cosAy;
+        const yy = py * cosAx;
+        const z = px * sinAy - py * sinAx;
+        const p = 850 / (850 + z);
+        const sx = cx + xx * p;
+        const sy = cy + yy * p;
+        if (i === 0) {
+          ctx.moveTo(sx, sy);
+        } else {
+          ctx.lineTo(sx, sy);
+        }
+      }
+      ctx.closePath();
+      ctx.clip();
+
+      ctx.fillStyle = '#030303';
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+      const mediaToDraw = transitionActive
+        ? transitionVideo
+        : (states[current].image ? portalImage : portalVideo);
+      drawCover(mediaToDraw, ctx);
+
+      if (transitionActive) {
+        drawShade(ctx);
+      }
+
+      ctx.restore();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  // Travel action
+  async function travel() {
+    if (busy || current === 'venus') return;
+    busy = true;
+    targetX = 0;
+    targetY = 0;
+    const next = current === 'mars' ? 'earth' : 'venus';
+
+    try {
+      transitionVideo.src = states[current].portal;
+      transitionVideo.load();
+      experienceEl.classList.add('is-loading');
+
+      await new Promise(resolve => {
+        let settled = false;
+        const onReady = () => {
+          if (!settled) {
+            settled = true;
+            transitionVideo.removeEventListener('canplaythrough', onReady);
+            transitionVideo.removeEventListener('error', onReady);
+            resolve();
+          }
+        };
+        transitionVideo.addEventListener('canplaythrough', onReady, { once: true });
+        transitionVideo.addEventListener('error', onReady, { once: true });
+        setTimeout(onReady, 1600);
+      });
+
+      experienceEl.classList.remove('is-loading', 'content-revealing', 'mask-revealing');
+      experienceEl.classList.add('is-transitioning');
+
+      transitionVideo.currentTime = 0;
+      transitionVideo.playbackRate = 1.3;
+      canvasOpacity = 1;
+      transitionActive = true;
+      await transitionVideo.play();
+
+      await animateValue(v => { expansion = v; }, 1100);
+
+      await new Promise(resolve => {
+        if (transitionVideo.ended) {
+          resolve();
+        } else {
+          const finishTransition = () => {
+            transitionVideo.removeEventListener('ended', finishTransition);
+            resolve();
+          };
+          transitionVideo.addEventListener('ended', finishTransition, { once: true });
+          const fallbackTime = (transitionVideo.duration ? (transitionVideo.duration / 1.3 + 1) : 4) * 1000;
+          setTimeout(finishTransition, fallbackTime);
+        }
+      });
+
+      // Freeze its final frame into #scene-canvas
+      const d = Math.min(window.devicePixelRatio || 1, 2);
+      sceneCanvas.width = window.innerWidth * d;
+      sceneCanvas.height = window.innerHeight * d;
+      sceneCanvas.style.width = window.innerWidth + 'px';
+      sceneCanvas.style.height = window.innerHeight + 'px';
+      const sceneCtx = sceneCanvas.getContext('2d');
+      sceneCtx.setTransform(d, 0, 0, d, 0, 0);
+      sceneCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      drawCover(transitionVideo, sceneCtx);
+      hasFrozenScene = true;
+
+      current = next;
+      experienceEl.classList.add('is-committing');
+      render();
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+      transitionActive = false;
+      expansion = 0;
+      maskScale = 0;
+      canvasOpacity = 1;
+      experienceEl.classList.remove('is-transitioning', 'is-committing');
+
+      const maskReveal = revealMask();
+      setTimeout(() => {
+        revealPlanetContent();
+      }, 100);
+      await maskReveal;
+
+      setTimeout(() => {
+        transitionVideo.removeAttribute('src');
+        transitionVideo.load();
+        busy = false;
+      }, 450);
+
+    } catch (err) {
+      console.error(err);
+      transitionActive = false;
+      expansion = 0;
+      maskScale = 1;
+      canvasOpacity = 1;
+      experienceEl.classList.remove('is-loading', 'is-transitioning', 'is-committing');
+      busy = false;
+    }
+  }
+
+  portalBtn.addEventListener('click', e => {
+    e.preventDefault();
+    travel();
+  });
+
+  // Custom cursor handlers
+  window.addEventListener('pointermove', e => {
+    pointerX = e.clientX;
+    pointerY = e.clientY;
+    if (!cursorVisible) {
+      cursorVisible = true;
+      orbitX = pointerX;
+      orbitY = pointerY;
+      cursorEl.classList.add('is-visible');
+    }
+  });
+
+  document.addEventListener('mouseleave', () => {
+    cursorVisible = false;
+    cursorEl.classList.remove('is-visible');
+  });
+
+  function onPortalEnter() {
+    cursorEl.classList.add('is-enter');
+  }
+  function onPortalLeave() {
+    cursorEl.classList.remove('is-enter');
+  }
+  portalBtn.addEventListener('pointerenter', onPortalEnter);
+  portalBtn.addEventListener('pointerleave', onPortalLeave);
+  portalBtn.addEventListener('mouseenter', onPortalEnter);
+  portalBtn.addEventListener('mouseleave', onPortalLeave);
+
+  function cursorLoop() {
+    orbitX += (pointerX - orbitX) * 0.2;
+    orbitY += (pointerY - orbitY) * 0.2;
+
+    cursorEl.style.transform = `translate3d(${orbitX}px, ${orbitY}px, 0)`;
+    cursorDot.style.transform = `translate3d(${pointerX - orbitX}px, ${pointerY - orbitY}px, 0) translate(-50%, -50%)`;
+
+    requestAnimationFrame(cursorLoop);
+  }
+
+  // Preloader logic
+  function runPreloader() {
+    let finished = false;
+    let rafId;
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      cancelAnimationFrame(rafId);
+      preloaderVal.textContent = '100';
+      preloaderCount.classList.add('is-leaving');
+      floatingLogo.classList.add('is-docked');
+      preloaderEl.classList.add('is-background');
+      document.body.classList.add('preload-complete');
+      startExperience();
+      setTimeout(() => {
+        preloaderCount.remove();
+      }, 750);
+      setTimeout(() => {
+        floatingLogo.classList.add('is-settled');
+      }, 2000);
+    }
+
+    function tick() {
+      if (finished) return;
+      if (preloaderVideo.duration) {
+        const pct = Math.min(100, Math.round((preloaderVideo.currentTime / preloaderVideo.duration) * 100));
+        preloaderVal.textContent = String(pct);
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function start() {
+      if (preloaderVideo.duration) {
+        preloaderVideo.playbackRate = Math.max(0.25, preloaderVideo.duration / 3);
+      }
+      preloaderVideo.play().then(() => {
+        rafId = requestAnimationFrame(tick);
+      }).catch(() => {
+        finish();
+      });
+    }
+
+    preloaderVideo.addEventListener('ended', finish);
+    preloaderVideo.addEventListener('error', finish);
+
+    function updateRate() {
+      if (preloaderVideo.duration) {
+        preloaderVideo.playbackRate = Math.max(0.25, preloaderVideo.duration / 3);
+      }
+    }
+    preloaderVideo.addEventListener('loadedmetadata', updateRate);
+    preloaderVideo.addEventListener('durationchange', updateRate);
+    start();
+    setTimeout(() => {
+      if (!finished) finish();
+    }, 4000);
+  }
+
+  // Prevent dead nav links jumping
+  document.querySelectorAll('.nav a, .menu').forEach(el => {
+    el.addEventListener('click', e => e.preventDefault());
+  });
+
+  // BOOT ORDER
+  document.querySelectorAll('.background').forEach(v => {
+    v.pause();
+    v.currentTime = 0;
+  });
+  resizeCanvas();
+  render();
+  requestAnimationFrame(draw);
+  requestAnimationFrame(cursorLoop);
+  runPreloader();
+
+})();
+</script>
 </body>
 </html>
